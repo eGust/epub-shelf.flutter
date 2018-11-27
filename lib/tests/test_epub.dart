@@ -16,7 +16,7 @@ const EPUB_FILES = [
   'The-Problems-of-Philosophy-LewisTheme.epub',
 ];
 
-class Globals {
+class TestEpub {
   static String _tempPath;
   static String get tempPath => _tempPath;
   static String get epubPath => '$tempPath/$_EPUB_TEMP_DIR';
@@ -74,4 +74,42 @@ class Globals {
 
         return file.writeAsBytes(bytes.buffer.asUint8List());
       }));
+
+  Future<void> _testIosOnly() async {
+    print('Test Large EPUB');
+    print('--');
+
+    final epub = await extractAssetToFile(
+      'assets/jy.epub',
+      "$epubPath/jy.epub",
+    );
+
+    final jsonFile = File("$tempPath/jy.epub.json");
+    DateTime start;
+    Duration ts;
+    if (await jsonFile.exists()) {
+      start = DateTime.now();
+      final pkg = await EpubPackage.loadFromJson(
+          jsonDecode(await jsonFile.readAsString()));
+      ts = DateTime.now().difference(start);
+      print('[time: $ts]\tloaded Json: ${pkg != null}');
+    }
+
+    final pkg = EpubPackage(epub);
+    start = DateTime.now();
+    await pkg.load();
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tloading ${pkg.filepath}');
+
+    start = DateTime.now();
+    final json = jsonEncode(pkg);
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tencodeJson: ${json.length}');
+
+    start = DateTime.now();
+    if (!(await jsonFile.exists())) await jsonFile.create();
+    await jsonFile.writeAsString(json);
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tsaved Json: ${await jsonFile.exists()}');
+  }
 }
