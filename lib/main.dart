@@ -1,31 +1,31 @@
+import 'dart:io';
+import 'dart:convert';
+
+import 'store/globals.dart';
 import 'package:flutter/material.dart';
+import 'package:epub_package/epub_package.dart';
+import 'package:permission/permission.dart';
 
-void main() => runApp(MyApp());
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-        // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
+void main() {
+  Globals.init();
+  runApp(App());
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class App extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        theme: ThemeData(
+          brightness: Brightness.dark,
+          accentColorBrightness: Brightness.dark,
+          accentColor: Colors.amberAccent,
+        ),
+        home: AppHome(title: 'EPUB Shelf'),
+      );
+}
+
+class AppHome extends StatefulWidget {
+  AppHome({Key key, this.title}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -39,71 +39,153 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _AppHomeState createState() => _AppHomeState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
+class _AppHomeState extends State<AppHome> {
   @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug paint" (press "p" in the console where you ran
-          // "flutter run", or select "Toggle Debug Paint" from the Flutter tool
-          // window in IntelliJ) to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+  Widget build(BuildContext context) => Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(32.0),
+          child: AppBar(
+            leading: IconButton(
+              padding: const EdgeInsets.all(3.0),
+              icon: Icon(Icons.cached),
+              onPressed: () {},
+              iconSize: 20.0,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.display1,
+            title: Center(
+                child: Text(widget.title, style: TextStyle(fontSize: 12.0))),
+            actions: <Widget>[
+              IconButton(
+                padding: const EdgeInsets.all(3.0),
+                icon: Icon(Icons.backup),
+                onPressed: () {},
+                iconSize: 20.0,
+              ),
+              IconButton(
+                padding: const EdgeInsets.all(3.0),
+                icon: Icon(Icons.tab),
+                onPressed: () {},
+                iconSize: 20.0,
+              ),
+            ],
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'You have pushed the button this many times:',
+              ),
+              FlatButton(
+                child: Text('test'),
+                onPressed: _testEpub,
+              )
+            ],
+          ),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: 0,
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              title: Container(height: 0.0),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.mail),
+              title: Container(height: 0.0),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              title: Container(height: 0.0),
             ),
           ],
+          onTap: (_) {},
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      );
+
+  void _testEpub() async {
+    await Globals.testEpubSpeed();
+    await _testIosOnly();
+  }
+
+  Future<void> _testIosOnly() async {
+    print('Test Large EPUB');
+    print('--');
+
+    final epub = await Globals.extractAssetToFile(
+      'assets/jy.epub',
+      "${Globals.epubPath}/jy.epub",
     );
+
+    final jsonFile = File("${Globals.tempPath}/jy.epub.json");
+    DateTime start;
+    Duration ts;
+    if (await jsonFile.exists()) {
+      start = DateTime.now();
+      final pkg = await EpubPackage.loadFromJson(
+          jsonDecode(await jsonFile.readAsString()));
+      ts = DateTime.now().difference(start);
+      print('[time: $ts]\tloaded Json: ${pkg != null}');
+    }
+
+    final pkg = EpubPackage(epub);
+    start = DateTime.now();
+    await pkg.load();
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tloading ${pkg.filepath}');
+
+    start = DateTime.now();
+    final json = jsonEncode(pkg);
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tencodeJson: ${json.length}');
+
+    start = DateTime.now();
+    if (!(await jsonFile.exists())) await jsonFile.create();
+    await jsonFile.writeAsString(json);
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tsaved Json: ${await jsonFile.exists()}');
+  }
+
+  void _testAndroidOnly() async {
+    if (!Platform.isAndroid) return;
+    final path = '/sdcard/Download/jy.epub';
+    final epub = File(path);
+
+    if (!(await epub.exists())) return;
+
+    final res = await Permission.requestPermissions([PermissionName.Storage]);
+    print('[EXISTS] $res');
+
+    DateTime start;
+    Duration ts;
+    final jsonFile = File('/sdcard/Download/jy.epub.json');
+
+    if (await jsonFile.exists()) {
+      start = DateTime.now();
+      final pkg = await EpubPackage.loadFromJson(
+          jsonDecode(await jsonFile.readAsString()));
+      ts = DateTime.now().difference(start);
+      print('[time: $ts]\tloaded Json: ${pkg != null}');
+    }
+
+    final pkg = EpubPackage(epub);
+    start = DateTime.now();
+    await pkg.load();
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tloading ${pkg.filepath}');
+
+    start = DateTime.now();
+    final json = jsonEncode(pkg);
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tencodeJson: ${json.length}');
+
+    start = DateTime.now();
+    if (!(await jsonFile.exists())) await jsonFile.create();
+    await jsonFile.writeAsString(json);
+    ts = DateTime.now().difference(start);
+    print('[time: $ts]\tsaved Json: ${await jsonFile.exists()}');
   }
 }
