@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+part of epub_shelf.api;
 
 enum LogLevel { info, debug, warning, error }
 enum TimestampStyle { timeOnly, noYear, dateTime }
@@ -74,8 +74,6 @@ class Logger {
     log(LogLevel.debug, msg);
   }
 }
-
-final logger = Logger();
 
 void log(String msg, [LogLevel lvl = LogLevel.debug]) {
   logger.log(lvl, msg);

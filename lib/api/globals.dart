@@ -1,10 +1,18 @@
-import 'device.dart';
-import 'storage.dart';
+part of epub_shelf.api;
 
-export 'device.dart' show device;
-export 'storage.dart' show storage;
+final logger = Logger();
+final Device device = Device._();
+final Storage storage = Storage._();
 
 Future<void> initializeGlobals() => Future.wait([
       Device.initialize(),
       Storage.initialize(),
     ]);
+
+Future<void> onAppPaused() async {
+  logd('onAppPaused');
+}
+
+Future<void> onAppResumed() async {
+  logd('onAppResumed');
+}

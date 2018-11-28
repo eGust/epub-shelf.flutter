@@ -1,6 +1,4 @@
-import 'dart:ui';
-import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+part of epub_shelf.api;
 
 class Device {
   static double _statusBarHeight;
@@ -8,6 +6,13 @@ class Device {
   static double _pixelRatio;
 
   Device._();
+
+  static Future<void> initialize() async {
+    final mediaData = device.queryMediaData();
+    _size = mediaData.size;
+    _statusBarHeight = mediaData.padding.top;
+    _pixelRatio = mediaData.devicePixelRatio;
+  }
 
   MediaQueryData queryMediaData() => MediaQueryData.fromWindow(window);
 
@@ -45,16 +50,4 @@ class Device {
   void show() {
     hidden = false;
   }
-
-  static Future<void> initialize() async {
-    if (device != null) return;
-
-    device = Device._();
-    final mediaData = device.queryMediaData();
-    _size = mediaData.size;
-    _statusBarHeight = mediaData.padding.top;
-    _pixelRatio = mediaData.devicePixelRatio;
-  }
 }
-
-Device device;

@@ -1,89 +1,73 @@
-import 'api/globals.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'api.dart';
+import 'screens.dart';
 
 void main() async {
   await initializeGlobals();
-  runApp(App());
+  runApp(App(home: Home()));
 }
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  static final ThemeData themeData = ThemeData(
+    brightness: Brightness.dark,
+    accentColorBrightness: Brightness.dark,
+    accentColor: Colors.amberAccent,
+  );
+
+  App({Key key, @required this.home}) : super(key: key);
+
+  final Widget home;
+
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    device.style = SystemUiOverlayStyle.light;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.paused:
+        {
+          onAppPaused();
+          break;
+        }
+      case AppLifecycleState.resumed:
+        {
+          onAppResumed();
+          break;
+        }
+      case AppLifecycleState.inactive:
+        {
+          logd('inactive');
+          break;
+        }
+      case AppLifecycleState.suspending:
+        {
+          logd('suspending');
+          break;
+        }
+      default:
+    }
+  }
+
   @override
   Widget build(BuildContext context) => MaterialApp(
-        theme: ThemeData(
-          brightness: Brightness.dark,
-          accentColorBrightness: Brightness.dark,
-          accentColor: Colors.amberAccent,
-        ),
-        home: HomeScreen(),
-      );
-}
-
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(32.0),
-          child: AppBar(
-            leading: IconButton(
-              padding: const EdgeInsets.all(3.0),
-              icon: Icon(Icons.cached),
-              onPressed: () {},
-              iconSize: 20.0,
-            ),
-            title:
-                Center(child: Text('Title', style: TextStyle(fontSize: 12.0))),
-            actions: <Widget>[
-              IconButton(
-                padding: const EdgeInsets.all(3.0),
-                icon: Icon(Icons.backup),
-                onPressed: () {},
-                iconSize: 20.0,
-              ),
-              IconButton(
-                padding: const EdgeInsets.all(3.0),
-                icon: Icon(Icons.tab),
-                onPressed: () {},
-                iconSize: 20.0,
-              ),
-            ],
-          ),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                '${device.width} x ${device.height}: isTablet = ${device.isTablet}',
-              ),
-              FlatButton(
-                child: Text('test'),
-                onPressed: () {},
-              )
-            ],
-          ),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 0,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              title: Container(height: 0.0),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.mail),
-              title: Container(height: 0.0),
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              title: Container(height: 0.0),
-            ),
-          ],
-          onTap: (_) {},
-        ),
+        theme: App.themeData,
+        home: Material(child: widget.home),
       );
 }
