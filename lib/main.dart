@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'api.dart';
-import 'screens.dart';
+import 'screens/home.dart';
 
 void main() async {
   await initializeGlobals();

@@ -15,5 +15,7 @@ class Storage {
     _tempPath = (await getTemporaryDirectory()).path;
     _documentPath = (await getApplicationDocumentsDirectory()).path;
     _sharedPreferences = await SharedPreferences.getInstance();
+    logd("temp: $_tempPath");
+    logd("doc: $_documentPath");
   }
 }

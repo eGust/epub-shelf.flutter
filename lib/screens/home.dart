@@ -1,4 +1,6 @@
-part of epub_shelf.screens;
+import '../screen_base.dart';
+
+import '../tests/test_epub.dart';
 
 class Home extends StatelessWidget {
   @override
@@ -15,7 +17,9 @@ class Home extends StatelessWidget {
               ),
               FlatButton(
                 child: Text('test'),
-                onPressed: () {},
+                onPressed: () {
+                  testEpubAll();
+                },
               )
             ],
           ),

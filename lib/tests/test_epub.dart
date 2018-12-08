@@ -2,11 +2,10 @@ import 'dart:io';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:epub_package/epub_package.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
-const _EPUB_TEMP_DIR = 'epub';
+import '../api.dart';
+
 const EPUB_FILES = [
   'A-Room-with-a-View-morrison.epub',
   'Beyond-Good-and-Evil-Galbraithcolor.epub',
@@ -14,102 +13,60 @@ const EPUB_FILES = [
   'Metamorphosis-jackson.epub',
   'The-Prince-1397058899.epub',
   'The-Problems-of-Philosophy-LewisTheme.epub',
+  'jy.epub', // 120M+
 ];
 
-class TestEpub {
-  static String _tempPath;
-  static String get tempPath => _tempPath;
-  static String get epubPath => '$tempPath/$_EPUB_TEMP_DIR';
+Future<File> extractFile(String fn) async {
+  final file = File('${storage.documentPath}/books/$fn');
+  if (await file.exists()) return file;
 
-  static Future<void> init() async {
-    _tempPath = (await getTemporaryDirectory()).path;
-    final epubDir = Directory(epubPath);
-    print('epubDir: $epubPath');
-    if (!(await epubDir.exists())) {
-      await epubDir.create();
+  final bytes = await rootBundle.load('assets/$fn');
+  await file.create(recursive: true);
+  return file.writeAsBytes(bytes.buffer.asUint8List());
+}
+
+Future<EpubPackage> testParseEpub(String fn) async {
+  final file = await extractFile(fn);
+
+  DateTime start = DateTime.now();
+  final epub = EpubPackage(file);
+  await epub.load();
+  Duration ts = DateTime.now().difference(start);
+
+  final fileSize = await file.length();
+  logd('[time: $ts]\tloaded and parsed epub (${fileSize / 1000}KB): $fn');
+  return epub;
+}
+
+Future<void> testAllWritePackage() async {
+  for (var fn in EPUB_FILES) {
+    final epub = await testParseEpub(fn);
+
+    final jsonFile = File("${storage.documentPath}/shelf/$fn.json");
+    if (!await jsonFile.exists()) {
+      await jsonFile.create(recursive: true);
     }
 
-    _exportEpubFiles();
+    jsonFile.writeAsString(jsonEncode(epub));
   }
+}
 
-  static Future<void> testEpubSpeed() async {
-    final packages =
-        EPUB_FILES.map((fn) => EpubPackage(File('$epubPath/$fn'))).toList();
+Future<EpubPackage> testLoadJson(String fn) async {
+  final jsonFile = File("${storage.documentPath}/shelf/$fn.json");
 
-    final results = await Future.wait(packages.map((pkg) async {
-      final start = DateTime.now();
-      await pkg.load();
-      final stop = DateTime.now();
-      return {
-        'start': start,
-        'stop': stop,
-        'package': pkg,
-      };
-    }));
+  if (!await jsonFile.exists()) return null;
 
-    results.forEach((h) {
-      final DateTime start = h['start'];
-      final DateTime stop = h['stop'];
-      final EpubPackage pkg = h['package'];
-      final ts = stop.difference(start);
-      print('[time: $ts]\t${pkg.properlyLoaded} - ${pkg.filepath}');
-    });
-  }
+  DateTime start = DateTime.now();
+  final json = await jsonFile.readAsString();
+  final pkg = await EpubPackage.loadFromJson(jsonDecode(json));
+  Duration ts = DateTime.now().difference(start);
 
-  static Future<File> extractAssetToFile(
-      String assetName, String filename) async {
-    final file = File(filename);
-    if (await file.exists()) return file;
+  final fileSize = await jsonFile.length();
+  logd('[time: $ts]\tloaded Json (${fileSize / 1000}KB): $fn');
+  return pkg;
+}
 
-    final bytes = await rootBundle.load(assetName);
-    await file.create(recursive: true);
-    return file.writeAsBytes(bytes.buffer.asUint8List());
-  }
-
-  static Future<Iterable<File>> _exportEpubFiles() =>
-      Future.wait(EPUB_FILES.map((fn) async {
-        final bytes = await rootBundle.load('assets/$fn');
-        final file = File('$epubPath/$fn');
-        if (await file.exists()) return file;
-
-        return file.writeAsBytes(bytes.buffer.asUint8List());
-      }));
-
-  Future<void> _testIosOnly() async {
-    print('Test Large EPUB');
-    print('--');
-
-    final epub = await extractAssetToFile(
-      'assets/jy.epub',
-      "$epubPath/jy.epub",
-    );
-
-    final jsonFile = File("$tempPath/jy.epub.json");
-    DateTime start;
-    Duration ts;
-    if (await jsonFile.exists()) {
-      start = DateTime.now();
-      final pkg = await EpubPackage.loadFromJson(
-          jsonDecode(await jsonFile.readAsString()));
-      ts = DateTime.now().difference(start);
-      print('[time: $ts]\tloaded Json: ${pkg != null}');
-    }
-
-    final pkg = EpubPackage(epub);
-    start = DateTime.now();
-    await pkg.load();
-    ts = DateTime.now().difference(start);
-    print('[time: $ts]\tloading ${pkg.filepath}');
-
-    start = DateTime.now();
-    final json = jsonEncode(pkg);
-    ts = DateTime.now().difference(start);
-    print('[time: $ts]\tencodeJson: ${json.length}');
-
-    start = DateTime.now();
-    if (!(await jsonFile.exists())) await jsonFile.create();
-    await jsonFile.writeAsString(json);
-    ts = DateTime.now().difference(start);
-    print('[time: $ts]\tsaved Json: ${await jsonFile.exists()}');
-  }
+Future<void> testEpubAll() async {
+  await testAllWritePackage();
+  for (var fn in EPUB_FILES) await testLoadJson(fn);
 }
