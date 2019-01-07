@@ -24,7 +24,7 @@ class Device {
   double get height => _size.longestSide;
   double get resolutionWidth => width * _pixelRatio;
   double get resolutionHeight => height * _pixelRatio;
-  bool get isTablet => width > 600;
+  bool get isTablet => width >= 600;
 
   static bool _hidden = false;
   static SystemUiOverlayStyle _style;

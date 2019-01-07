@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:epub_package/epub_package.dart';
@@ -66,7 +68,26 @@ Future<EpubPackage> testLoadJson(String fn) async {
   return pkg;
 }
 
+Future<void> updateDb(EpubPackage pkg) async {
+  final cnt = (await shelf.db
+          .rawQuery('SELECT 1 FROM books WHERE id = ?', [pkg.filePath]))
+      .length;
+  if (cnt > 0) return;
+
+  final ca = pkg.metadata.getCoverImageAsset();
+  final bytes = ca == null ? null : await pkg.readAsBytes(ca.filename);
+  final cover = bytes == null ? null : Uint8List.fromList(bytes);
+  await shelf.db.insert('books', {
+    'id': pkg.filePath,
+    'cover': cover,
+    'meta': jsonEncode(pkg.toJson()),
+  });
+}
+
 Future<void> testEpubAll() async {
   await testAllWritePackage();
-  for (var fn in EPUB_FILES) await testLoadJson(fn);
+  for (var fn in EPUB_FILES) {
+    final pkg = await testLoadJson(fn);
+    await updateDb(pkg);
+  }
 }
