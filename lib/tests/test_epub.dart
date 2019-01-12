@@ -77,10 +77,13 @@ Future<void> updateDb(EpubPackage pkg) async {
   final ca = pkg.metadata.getCoverImageAsset();
   final bytes = ca == null ? null : await pkg.readAsBytes(ca.filename);
   final cover = bytes == null ? null : Uint8List.fromList(bytes);
+  final jsonObj = pkg.toJson();
+  final filePath = pkg.filePath.substring(storage.documentPath.length);
+  jsonObj['filename'] = filePath;
   await shelf.db.insert('books', {
-    'id': pkg.filePath,
+    'id': filePath,
     'cover': cover,
-    'meta': jsonEncode(pkg.toJson()),
+    'meta': jsonEncode(jsonObj),
   });
 }
 

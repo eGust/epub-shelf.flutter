@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'api.dart';
-import 'screens/home.dart';
+import 'screens/home_page.dart';
 
 void main() async {
   await initializeGlobals();
-  runApp(App(home: Home()));
+  runApp(App(home: HomePage()));
 }
 
 class App extends StatefulWidget {

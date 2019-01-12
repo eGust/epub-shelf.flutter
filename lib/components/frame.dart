@@ -8,7 +8,10 @@ class Frame extends StatelessWidget {
     Widget foot,
   })  : widgets = [
           head,
-          Expanded(child: body, flex: 1),
+          Expanded(
+            child: SingleChildScrollView(child: body),
+            flex: 1,
+          ),
           foot,
         ].where((w) => w != null).toList(),
         super(key: key);
