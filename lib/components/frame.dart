@@ -9,7 +9,7 @@ class Frame extends StatelessWidget {
   })  : widgets = [
           head,
           Expanded(
-            child: SingleChildScrollView(child: body),
+            child: body,
             flex: 1,
           ),
           foot,
@@ -23,5 +23,20 @@ class Frame extends StatelessWidget {
         child: Column(
           children: widgets,
         ),
+      );
+}
+
+class BlankFrame extends StatelessWidget {
+  BlankFrame({
+    Key key,
+    @required this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        margin: EdgeInsets.only(top: device.statusBarHeight),
+        child: child,
       );
 }

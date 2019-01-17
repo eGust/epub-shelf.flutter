@@ -1,6 +1,7 @@
 import '../screen_base.dart';
 import 'home/book_shelf.dart';
 import './reader_page.dart';
+import 'package:http/http.dart' as http;
 
 import '../tests/test_epub.dart';
 
@@ -25,11 +26,15 @@ class _HomePageState extends State<HomePage> {
         head: TopBar(
           title: Center(child: Text('Title', style: TextStyle(fontSize: 16.0))),
         ),
-        body: activeTabIndex == 0
-            ? BookShelf(
-                onSelectedBook: (book) => _showReader(book),
-              )
-            : Container(),
+        body: SingleChildScrollView(
+          child: activeTabIndex == 0
+              ? BookShelf(
+                  onSelectedBook: (book) => _showReader(book),
+                )
+              : Center(
+                  child: Text(""),
+                ),
+        ),
         foot: IconTabGroup(
           activeIndex: activeTabIndex,
           icons: [
@@ -39,7 +44,8 @@ class _HomePageState extends State<HomePage> {
           ],
           onSelected: (tabIndex) => setState(() {
                 activeTabIndex = tabIndex;
-                if (tabIndex == 2) {
+                if (tabIndex == 1) {
+                } else if (tabIndex == 2) {
                   testEpubAll();
                 }
               }),

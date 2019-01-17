@@ -1,14 +1,16 @@
 part of epub_shelf.api;
 
 final logger = Logger();
-final Device device = Device._();
-final Storage storage = Storage._();
-final Shelf shelf = Shelf._();
+final device = Device._();
+final storage = Storage._();
+final shelf = Shelf._();
+final webService = WebService._();
 
 Future<void> initializeGlobals() => Future.wait([
       Device.initialize(),
       Storage.initialize(),
       Shelf.initialize(),
+      WebService.initialize(),
     ]);
 
 Future<void> onAppPaused() async {

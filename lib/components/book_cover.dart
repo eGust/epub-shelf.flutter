@@ -7,6 +7,7 @@ class BookCover extends StatelessWidget {
     @required this.onPressed,
   }) : super(key: key) {
     if (_size == null) {
+      logd('width = ${device.width}');
       _size = ((device.width - 20.0) / 3).floor() - 20.0;
     }
   }

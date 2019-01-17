@@ -1,6 +1,8 @@
 library epub_shelf.api;
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -15,3 +17,4 @@ part 'api/globals.dart';
 part 'api/logger.dart';
 part 'api/shelf.dart';
 part 'api/storage.dart';
+part 'api/web_service.dart';

@@ -10,11 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_inappbrowser: any
+  http: any
   path_provider: any
   permission: any
   shared_preferences: any
   sqflite: any
-  flutter_inappbrowser: any
 
   epub_package:
     path: ../epub-package
