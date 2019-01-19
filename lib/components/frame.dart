@@ -26,6 +26,33 @@ class Frame extends StatelessWidget {
       );
 }
 
+class TransparentFrame extends StatelessWidget {
+  TransparentFrame({
+    Key key,
+    TopBar head,
+    @required Widget body,
+    Widget foot,
+  })  : widgets = [
+          head,
+          Expanded(
+            child: body,
+            flex: 1,
+          ),
+          foot,
+        ].where((w) => w != null).toList(),
+        super(key: key);
+
+  final List<Widget> widgets;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        color: Colors.transparent,
+        child: Column(
+          children: widgets,
+        ),
+      );
+}
+
 class BlankFrame extends StatelessWidget {
   BlankFrame({
     Key key,

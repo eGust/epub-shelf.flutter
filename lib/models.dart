@@ -4,8 +4,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
-
 import 'package:epub_package/epub_package.dart';
 
 import 'api.dart';

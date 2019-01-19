@@ -30,7 +30,9 @@ class BookCover extends StatelessWidget {
             children: <Widget>[
               book.cover == null
                   ? Container(
+                      width: _size - 10.0,
                       height: _size,
+                      color: Colors.white10,
                     )
                   : Container(
                       height: _size,

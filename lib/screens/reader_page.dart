@@ -22,7 +22,6 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   void initState() {
     super.initState();
-
     _oldRouter = webService.onRoute;
     final router = BookRouter(_book.package);
     webService.onRoute = router.dispatch;
@@ -81,7 +80,10 @@ class _ReaderPageState extends State<ReaderPage> {
   @override
   Widget build(BuildContext context) => Stack(
         children: <Widget>[
-          BlankFrame(
+          Container(
+            padding:
+                EdgeInsets.only(top: device.statusBarHeight + 10, bottom: 20.0),
+            color: Colors.white,
             child: InAppWebView(
               initialUrl: 'http://127.0.0.1:9012/',
               initialOptions: {'clearCache': true},
@@ -96,8 +98,14 @@ class _ReaderPageState extends State<ReaderPage> {
               },
             ),
           ),
-          BlankFrame(
-              child: Row(
+          GestureDetector(
+            child: Container(color: Colors.transparent),
+            onTapUp: (details) {
+              logd('onTapUp: ${details.globalPosition}');
+            },
+          ),
+          /*
+          Row(
             children: <Widget>[
               Expanded(
                 flex: 2,
@@ -122,11 +130,27 @@ class _ReaderPageState extends State<ReaderPage> {
                 ),
               ),
             ],
-          )),
+          ),
+          */
           _isReading
               ? Container()
-              : Frame(
-                  body: Container(),
+              : TransparentFrame(
+                  head: TopBar(
+                    title: Center(
+                        child: Text('Title', style: TextStyle(fontSize: 16.0))),
+                  ),
+                  body: Touchable(
+                    onPressed: _switchReadMode,
+                  ),
+                  foot: IconTabGroup(
+                    activeIndex: 0,
+                    icons: [
+                      const Icon(Icons.library_books),
+                      const Icon(Icons.history),
+                      const Icon(Icons.settings),
+                    ],
+                    onSelected: (_) => {},
+                  ),
                 ),
         ],
       );

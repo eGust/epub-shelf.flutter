@@ -29,8 +29,8 @@ class Device {
   static bool _hidden = false;
   static SystemUiOverlayStyle _style;
 
-  bool get hidden => _hidden;
-  set hidden(bool value) {
+  bool get statusBarHidden => _hidden;
+  set statusBarHidden(bool value) {
     if (value == _hidden) return;
     _hidden = value;
     SystemChrome.setEnabledSystemUIOverlays(
@@ -43,11 +43,11 @@ class Device {
     SystemChrome.setSystemUIOverlayStyle(style);
   }
 
-  void hide() {
-    hidden = true;
+  void hideStatusBar() {
+    statusBarHidden = true;
   }
 
-  void show() {
-    hidden = false;
+  void showStatusBar() {
+    statusBarHidden = false;
   }
 }
