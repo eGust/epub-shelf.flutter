@@ -10,4 +10,5 @@ import 'package:epub_package/epub_package.dart';
 
 import 'api.dart';
 
+part 'models/book_router.dart';
 part 'models/read_history.dart';

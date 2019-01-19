@@ -1,5 +1,17 @@
 part of epub_shelf.api;
 
+class RouteResult {
+  const RouteResult({
+    @required this.contentType,
+    @required this.data,
+  });
+
+  final String contentType;
+  final List<int> data;
+}
+
+typedef Router = Future<RouteResult> Function({String path});
+
 class WebService {
   WebService._();
 
@@ -9,13 +21,15 @@ class WebService {
   static const STATIC_RESOURCES = {
     '__j': {
       'type': 'javascript',
-      'path': 'assets/index.js',
+      'path': 'web/index.js',
     },
     '__c': {
       'type': 'css',
-      'path': 'assets/index.css',
+      'path': 'web/index.css',
     },
   };
+
+  Router onRoute;
 
   Future<void> router(HttpRequest req) async {
     final res = req.response;
@@ -35,8 +49,16 @@ class WebService {
           body = await rootBundle.loadString(asset['path']);
         }
         res.headers.add('Content-Type', contentType);
-        res.headers.add('Cache-Control', 'max-age=3600');
+        res.headers.add('Cache-Control', _cacheControl);
         res.write(body);
+        res.close();
+        return;
+      }
+
+      final route = onRoute == null ? null : await onRoute(path: path);
+      if (route != null) {
+        res.headers.add('Content-Type', route.contentType);
+        res.add(route.data);
         res.close();
         return;
       }
@@ -50,6 +72,8 @@ class WebService {
     _server.listen(webService.router);
     logd('started server');
   }
+
+  final _cacheControl = 'max-age=${Logger.isDebug ? -1 : 3600}';
 
   static const _HTML_INDEX =
       '''<!DOCTYPE html><html><head><link href="?__c" rel="stylesheet"></head><body><main><div id="chapter"><div id="content"></div></div></main><style id="theme"></style><script type="text/javascript" src="?__j"></script></body></html>''';

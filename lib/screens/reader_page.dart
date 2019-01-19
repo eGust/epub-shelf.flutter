@@ -4,8 +4,14 @@ import 'package:flutter_inappbrowser/flutter_inappbrowser.dart';
 import '../screen_base.dart';
 
 class ReaderPage extends StatefulWidget {
-  ReaderPage({Key key, @required this.book}) : super(key: key);
+  ReaderPage({Key key, @required this.book})
+      : router = BookRouter(book.package),
+        super(key: key) {
+    webService.onRoute = router.dispatch;
+  }
   final Book book;
+  final BookRouter router;
+
   @override
   _ReaderPageState createState() => _ReaderPageState();
 }
@@ -19,6 +25,7 @@ class _ReaderPageState extends State<ReaderPage> {
           BlankFrame(
             child: InAppWebView(
               initialUrl: 'http://127.0.0.1:9012/',
+              initialOptions: {'clearCache': true},
               onWebViewCreated: (controller) {
                 _webViewController = controller;
               },
@@ -26,13 +33,20 @@ class _ReaderPageState extends State<ReaderPage> {
           ),
           BlankFrame(
             child: GestureDetector(
-              child: Container(color: Colors.black12),
-              onTap: () {
+              child: Container(color: Colors.transparent),
+              onTap: () async {
                 logd('onPressed');
                 if (_webViewController == null) return;
 
-                _webViewController.injectScriptCode(
-                    "const div = document.createElement('div'); div.innerText='test ${DateTime.now()}'; document.body.lastElementChild.after(div);");
+                final html = await _webViewController.injectScriptCode('''
+                  (() => {
+                    const div = document.createElement('div');
+                    div.innerText='test ${DateTime.now()}';
+                    document.body.lastElementChild.after(div);
+                    return JSON.stringify(currentChapter);
+                  })()
+                  ''');
+                logd(html);
               },
             ),
           ),
