@@ -9,7 +9,7 @@ class BookShelf extends StatefulWidget {
 }
 
 class _BookShelfState extends State<BookShelf> {
-  final books = <Book>[];
+  final books = <ReadHistory>[];
 
   @override
   void initState() {

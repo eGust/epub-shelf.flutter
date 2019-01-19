@@ -1,7 +1,6 @@
 import '../screen_base.dart';
 import 'home/book_shelf.dart';
-import './reader_page.dart';
-import 'package:http/http.dart' as http;
+import 'reader_page.dart';
 
 import '../tests/test_epub.dart';
 
@@ -13,7 +12,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int activeTabIndex = 0;
 
-  Future<void> _showReader(Book book) async {
+  Future<void> _showReader(ReadHistory book) async {
     await Navigator.push(
       context,
       buildRoute(ReaderPage(book: book)),

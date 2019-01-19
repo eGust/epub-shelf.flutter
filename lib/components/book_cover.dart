@@ -13,7 +13,7 @@ class BookCover extends StatelessWidget {
   }
 
   static double _size;
-  final Book book;
+  final ReadHistory book;
   final VoidCallback onPressed;
 
   @override

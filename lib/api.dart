@@ -1,7 +1,6 @@
 library epub_shelf.api;
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';

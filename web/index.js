@@ -1,3 +1,4 @@
+const MESSAGE = 'EPUB';
 const GAP_WIDTH = 20;
 const elements = {};
 const currentChapter = {
@@ -22,14 +23,17 @@ onContentLoaded(() => {
     content: document.getElementById('content'),
     theme: document.getElementById('theme'),
   });
-
-  console.log('onReady');
-  const { callHandler } = window.flutter_inappbrowser || {};
-  if (callHandler) {
-    console.log(window.flutter_inappbrowser);
-    callHandler.callHandler('READY');
-  }
 });
+
+const ping = () => {
+  const { callHandler } = window.flutter_inappbrowser || {};
+
+  console.log('ping');
+  if (callHandler) {
+    callHandler(MESSAGE, { type: 'PING' });
+  }
+  return 'ping';
+}
 
 const downloadChapter = async (path) => {
   try {
@@ -67,9 +71,10 @@ const goPage = (pageIndex = 0) => {
 
 const onLoadedChapter = () => {
   const { callHandler } = window.flutter_inappbrowser || {};
-  console.log(window.flutter_inappbrowser, currentChapter);
+  console.log(onLoadedChapter, JSON.stringify(currentChapter));
+
   if (callHandler) {
-    callHandler('CHAPTER_LOADED', currentChapter);
+    callHandler(MESSAGE, { type: 'CHAPTER_LOADED', currentChapter });
   } else {
     goPage();
   }
