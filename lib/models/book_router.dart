@@ -11,7 +11,8 @@ class BookRouter {
         ? null
         : RouteResult(
             contentType: await doc.mimeType(),
-            data: await doc.readAsBytes(),
+            data: await doc.rawAsBytes(),
+            encoding: doc.isCompressed ? 'deflate' : null,
           );
   }
 }

@@ -4,9 +4,11 @@ class RouteResult {
   const RouteResult({
     @required this.contentType,
     @required this.data,
+    this.encoding,
   });
 
   final String contentType;
+  final String encoding;
   final List<int> data;
 }
 
@@ -40,11 +42,11 @@ class WebService {
         String body;
         final asset = STATIC_RESOURCES[req.requestedUri.query];
         if (asset == null) {
-          logd('index.html');
+          logd('[GET] 200 /index.html');
           contentType = 'text/html';
           body = _HTML_INDEX;
         } else {
-          logd('index.${asset['type']}');
+          logd('[GET] 200 /index.${asset['type']}');
           contentType = 'text/${asset['type']}';
           body = await rootBundle.loadString(asset['path']);
         }
@@ -55,14 +57,20 @@ class WebService {
         return;
       }
 
-      final route = onRoute == null ? null : await onRoute(path: path);
-      if (route != null) {
-        res.headers.add('Content-Type', route.contentType);
-        res.add(route.data);
+      final r = onRoute == null ? null : await onRoute(path: path);
+      if (r != null) {
+        logd('[GET] 200 $path => ${r.contentType}');
+        res.headers.add('Content-Type', r.contentType);
+        // res.headers.add('Cache-Control', 'no-cache');
+        if (r.encoding != null) {
+          res.headers.add('Content-Encoding', r.encoding);
+        }
+        res.add(r.data);
         res.close();
         return;
       }
     }
+    logd('${req.method} 404! ${req.requestedUri.path}');
     res.statusCode = 404;
     res.close();
   }
@@ -73,7 +81,7 @@ class WebService {
     logd('started server');
   }
 
-  final _cacheControl = 'max-age=${Logger.isDebug ? -1 : 3600}';
+  final _cacheControl = Logger.isDebug ? 'no-cache' : 'max-age=60';
 
   static const _HTML_INDEX =
       '''<!DOCTYPE html><html><head><link href="?__c" rel="stylesheet"></head><body><main><div id="chapter"><div id="content"></div></div></main><style id="theme"></style><script type="text/javascript" src="?__j"></script></body></html>''';
