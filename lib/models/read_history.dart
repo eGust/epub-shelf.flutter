@@ -7,6 +7,8 @@ class ReadHistory {
   final Uint8List cover;
   final EpubPackage package;
 
+  int get navCount => package.nav.count;
+
   Future<void> loadHistory() async {
     final r = await shelf.db.query(
       'books',
